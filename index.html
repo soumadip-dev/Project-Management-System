@@ -1,31 +1,67 @@
 <!DOCTYPE html>
-<html lang="en" class="h-100">
+<html lang="en" class="h-100" data-theme="light">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YouTube Video Browser</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Book Library</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="./style.css">
 </head>
 
-<body class="bg-light p-3 h-100">
-  <div class="container pt-4">
-    <h1 class="text-center mb-4 display-5 fw-bold">YouTube Video Browser</h1>
+<body class="h-100">
+  <nav class="navbar">
+    <div class="container">
+      <a href="#" class="logo">
+        <i class="fas fa-book-open"></i>
+        <span>BookLibrary</span>
+      </a>
 
-    <!-- Search Bar -->
-    <div class="mx-auto my-4" style="max-width: 600px">
-      <input type="text" id="searchInput" class="form-control form-control-lg"
-        placeholder="Search videos or channels...">
+      <button type="button" id="menuToggle" class="mobile-toggle" aria-label="Toggle menu">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <div id="navbarContent" class="navbar-content">
+        <form class="search-form" role="search">
+          <div class="search-input-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="search" placeholder="Search books..." aria-label="Search books">
+          </div>
+        </form>
+
+        <div class="navbar-actions">
+          <div class="view-controls">
+            <button id="gridView" type="button" class="view-btn active" aria-label="Grid view">
+              <i class="fas fa-th-large"></i>
+            </button>
+            <button id="listView" type="button" class="view-btn" aria-label="List view">
+              <i class="fas fa-list"></i>
+            </button>
+          </div>
+
+          <div class="dropdown">
+            <button id="sortDropdown" class="dropdown-toggle" aria-expanded="false" aria-haspopup="true">
+              <i class="fas fa-sort"></i>
+              <span id="selectedSort">Title (A-Z)</span>
+              <i class="fas fa-chevron-down dropdown-arrow"></i>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+              <li><a href="#" class="dropdown-item" onclick="selectSort(this)">Title (A-Z)</a></li>
+              <li><a href="#" class="dropdown-item" onclick="selectSort(this)">Title (Z-A)</a></li>
+              <li><a href="#" class="dropdown-item" onclick="selectSort(this)">Date (Oldest)</a></li>
+              <li><a href="#" class="dropdown-item" onclick="selectSort(this)">Date (Newest)</a></li>
+            </ul>
+          </div>
+
+          <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
+            <i class="fas fa-moon"></i>
+            <i class="fas fa-sun"></i>
+          </button>
+        </div>
+      </div>
     </div>
-
-    <!-- Error Message -->
-    <div id="errorMessage" class="alert alert-danger d-none mb-4" role="alert"></div>
-
-    <!-- Video Grid -->
-    <div id="videoContainer" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4"></div>
-  </div>
-
-  <script src="./script.js"></script>
+  </nav>
+  <script src="script.js" defer></script>
 </body>
 
 </html>

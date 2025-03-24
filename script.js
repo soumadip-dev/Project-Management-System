@@ -1,84 +1,54 @@
-///////// DOM elements
-const videoContainer = document.getElementById('videoContainer');
-const searchInput = document.getElementById('searchInput');
-const loadingElement = document.getElementById('loading');
-const errorElement = document.getElementById('errorMessage');
+document.addEventListener('DOMContentLoaded', function () {
+  // Mobile menu toggle
+  const menuToggle = document.getElementById('menuToggle');
+  const navbarContent = document.getElementById('navbarContent');
 
-///////// AOI URL
-const API_URL = 'https://api.freeapi.app/api/v1/public/youtube/videos';
-
-///////// Global variable
-let allVideos = [];
-
-///////// Functions
-
-// Function to fetch videos from API
-async function fetchVideos() {
-  try {
-    const response = await fetch(API_URL);
-
-    if (!response.ok) {
-      throw new Error('Failed to load videos');
-    }
-
-    const data = await response.json();
-    allVideos = data?.data?.data?.map(item => item.items);
-    displayVideos(allVideos);
-  } catch (error) {
-    console.error(error.message);
-    errorElement.textContent = error.message;
-    errorElement.classList.remove('d-none');
-  }
-}
-
-// Function to display videos on the page
-function displayVideos(videos) {
-  videoContainer.innerHTML = '';
-
-  if (videos.length === 0) {
-    videoContainer.innerHTML =
-      '<h4 class="text-center text-muted">No videos found</h4>';
-    return;
-  }
-
-  videos.forEach(video => {
-    const videoElem = document.createElement('div');
-    videoElem.classList.add('col');
-
-    videoElem.innerHTML = `
-            <a href="https://www.youtube.com/watch?v=${
-              video.id
-            }"  class="card h-100 video-card text-decoration-none text-dark">
-                <img src="${
-                  video.snippet?.thumbnails?.medium?.url || ''
-                }" class="card-img-top">
-                <div class="card-body">
-                    <h5 class="card-title">${
-                      video.snippet?.title || 'No Title'
-                    }</h5>
-                    <p class="card-text text-muted">${
-                      video.snippet?.channelTitle || 'Unknown Channel'
-                    }</p>
-                </div>
-            </a>
-        `;
-
-    videoContainer.appendChild(videoElem);
+  menuToggle.addEventListener('click', function () {
+    navbarContent.classList.toggle('active');
   });
-}
 
-// Function to filter videos by search
-function handleSearch() {
-  const query = searchInput.value.toLowerCase();
-  displayVideos(
-    allVideos.filter(
-      video =>
-        video.snippet?.title?.toLowerCase().includes(query) ||
-        video.snippet?.channelTitle?.toLowerCase().includes(query)
-    )
-  );
-}
+  // Theme toggle
+  const themeToggle = document.getElementById('themeToggle');
+  const html = document.documentElement;
 
-///////// Event listeners
-searchInput.addEventListener('input', handleSearch);
-document.addEventListener('DOMContentLoaded', fetchVideos);
+  themeToggle.addEventListener('click', function () {
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    html.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+  });
+
+  // Check for saved theme preference
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  html.setAttribute('data-theme', savedTheme);
+
+  // View controls
+  const gridView = document.getElementById('gridView');
+  const listView = document.getElementById('listView');
+
+  gridView.addEventListener('click', function () {
+    gridView.classList.add('active');
+    listView.classList.remove('active');
+    // Add your grid view logic here
+  });
+
+  listView.addEventListener('click', function () {
+    listView.classList.add('active');
+    gridView.classList.remove('active');
+    // Add your list view logic here
+  });
+
+  // Sort dropdown functionality
+  function selectSort(element) {
+    const selectedText = element.textContent;
+    document.getElementById('selectedSort').textContent = selectedText;
+    // Add your sort logic here
+  }
+
+  // Close mobile menu when clicking outside
+  document.addEventListener('click', function (e) {
+    if (!navbarContent.contains(e.target) && e.target !== menuToggle) {
+      navbarContent.classList.remove('active');
+    }
+  });
+});
