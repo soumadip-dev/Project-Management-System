@@ -14,16 +14,18 @@ async function fetchBooks() {
 
     const books = data?.data?.data || [];
 
-    books.forEach(book => {
-      const bookCard = createCard(book);
-      booksContainer.appendChild(bookCard);
-    });
-
-    return data.data.data;
+    return books;
   } catch (error) {
     console.error(error);
     return [];
   }
+}
+
+async function displayBooks(books) {
+  books.forEach(book => {
+    const bookCard = createCard(book);
+    booksContainer.appendChild(bookCard);
+  });
 }
 
 function createCard(book) {
@@ -31,10 +33,6 @@ function createCard(book) {
   card.classList.add('book-card');
   card.href = book.volumeInfo.infoLink;
   card.target = '_blank';
-  // card.setAttribute(
-  //   'data-link',
-  //   book.volumeInfo.infoLink ? encodeURI(book.volumeInfo.infoLink) : '#'
-  // );
 
   card.innerHTML = `
    <div class="img-container">
@@ -67,33 +65,96 @@ function toggleTheme() {
   localStorage.setItem('theme', newTheme);
 }
 
-themeToggle.addEventListener('click', toggleTheme);
+// function to sort A-Z
+async function sortingAToZ() {
+  const books = await fetchBooks();
+  books.sort((a, b) => {
+    let titleA = a.volumeInfo.title.toLowerCase();
+    let titleB = b.volumeInfo.title.toLowerCase();
+    return titleA.localeCompare(titleB);
+  });
+  displayBooks(books);
+}
+// function to sort Z-A
+async function sortingZToA() {
+  const books = await fetchBooks();
+  books.sort((a, b) => {
+    let titleA = a.volumeInfo.title.toLowerCase();
+    let titleB = b.volumeInfo.title.toLowerCase();
+    return titleB.localeCompare(titleA);
+  });
+  displayBooks(books);
+}
+
+// function to sort Date(oldest)
+async function sortingDateOldest() {
+  const books = await fetchBooks();
+  books.sort((a, b) => {
+    const dateA = new Date(a.volumeInfo.publishedDate || 0);
+    const dateB = new Date(b.volumeInfo.publishedDate || 0);
+    return dateA.getTime() - dateB.getTime();
+  });
+  displayBooks(books);
+}
+
+// Function to sort Date(newest)
+async function sortingDateNewest() {
+  const books = await fetchBooks();
+  books.sort((a, b) => {
+    const dateA = new Date(a.volumeInfo.publishedDate || 0);
+    const dateB = new Date(b.volumeInfo.publishedDate || 0);
+    return dateB.getTime() - dateA.getTime();
+  });
+  displayBooks(books);
+}
 
 // Check for saved theme preference
 const savedTheme = localStorage.getItem('theme') || 'light';
 html.setAttribute('data-theme', savedTheme);
 
-// View controls
-gridView.addEventListener('click', function () {
-  gridView.classList.add('active');
-  listView.classList.remove('active');
-  booksContainer.classList.remove('list-view');
-  booksContainer.classList.add('grid-view');
-});
-
-listView.addEventListener('click', function () {
-  listView.classList.add('active');
-  gridView.classList.remove('active');
-  booksContainer.classList.remove('grid-view');
-  booksContainer.classList.add('list-view');
-});
-
 // Sort dropdown functionality
 function selectSort(element) {
   const selectedText = element.textContent;
   document.getElementById('selectedSort').textContent = selectedText;
-  // Add your sort logic here
+  booksContainer.innerHTML = '';
+  switch (selectedText) {
+    case 'Title (A-Z)':
+      sortingAToZ();
+      break;
+    case 'Title (Z-A)':
+      sortingZToA();
+      break;
+    case 'Date (Oldest)':
+      sortingDateOldest();
+      break;
+    case 'Date (Newest)':
+      sortingDateNewest();
+      break;
+    default:
+      displayBooks(fetchBooks());
+  }
 }
 
 //////////// Event listuners
-document.addEventListener('DOMContentLoaded', fetchBooks);
+document.addEventListener('DOMContentLoaded', () => {
+  // Fetch the books
+  fetchBooks().then(books => displayBooks(books));
+
+  // change theme
+  themeToggle.addEventListener('click', toggleTheme);
+
+  // View controls
+  gridView.addEventListener('click', function () {
+    gridView.classList.add('active');
+    listView.classList.remove('active');
+    booksContainer.classList.remove('list-view');
+    booksContainer.classList.add('grid-view');
+  });
+
+  listView.addEventListener('click', function () {
+    listView.classList.add('active');
+    gridView.classList.remove('active');
+    booksContainer.classList.remove('grid-view');
+    booksContainer.classList.add('list-view');
+  });
+});
