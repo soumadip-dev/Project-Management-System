@@ -4,9 +4,11 @@ const html = document.documentElement;
 const gridView = document.getElementById('gridView');
 const listView = document.getElementById('listView');
 const booksContainer = document.getElementById('books-container');
+const searchBox = document.getElementById('search-box');
 
 ////////// Functions
 
+// function to fetch books from API
 async function fetchBooks() {
   try {
     const response = await fetch('https://api.freeapi.app/api/v1/public/books');
@@ -21,6 +23,7 @@ async function fetchBooks() {
   }
 }
 
+// Function to display book in webpage
 async function displayBooks(books) {
   books.forEach(book => {
     const bookCard = createCard(book);
@@ -28,6 +31,7 @@ async function displayBooks(books) {
   });
 }
 
+// Function to create card of book
 function createCard(book) {
   const card = document.createElement('a');
   card.classList.add('book-card');
@@ -58,11 +62,28 @@ function createCard(book) {
   return card;
 }
 
+// Function to toggle theme ogf the webpage
 function toggleTheme() {
   const currentTheme = html.getAttribute('data-theme');
   const newTheme = currentTheme === 'light' ? 'dark' : 'light';
   html.setAttribute('data-theme', newTheme);
   localStorage.setItem('theme', newTheme);
+}
+
+// Function of searching
+function filterByName(event) {
+  const searchTerm = event.target.value.toLowerCase();
+  const books = document.querySelectorAll('.text-container h3');
+
+  books.forEach(function (book) {
+    book.parentElement.parentElement.style.display = '';
+
+    const bookTitle = book?.innerHTML.toLowerCase() || '';
+
+    if (!bookTitle.startsWith(searchTerm)) {
+      book.parentElement.parentElement.style.display = 'none';
+    }
+  });
 }
 
 // function to sort A-Z
@@ -75,6 +96,7 @@ async function sortingAToZ() {
   });
   displayBooks(books);
 }
+
 // function to sort Z-A
 async function sortingZToA() {
   const books = await fetchBooks();
@@ -142,6 +164,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // change theme
   themeToggle.addEventListener('click', toggleTheme);
+
+  // Search
+  searchBox.addEventListener('input', filterByName);
 
   // View controls
   gridView.addEventListener('click', function () {
