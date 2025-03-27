@@ -10,6 +10,7 @@
 </head>
 
 <body class="h-100">
+  <!-- Navber -->
   <header>
     <nav class="navbar">
       <div class="container">
@@ -66,9 +67,19 @@
       </div>
     </nav>
   </header>
+  <!-- Main Container  -->
   <main class="books-container grid-view" id="books-container">
   </main>
-
+  <!-- Pagination -->
+  <div class="pagination-container">
+    <button id="prev" class="pagination-btn">
+      <i class="fas fa-chevron-left"></i> Previous
+    </button>
+    <span class="page-number">Page <span id="currentPage">1</span></span>
+    <button id="next" class="pagination-btn">
+      Next <i class="fas fa-chevron-right"></i>
+    </button>
+  </div>
   <script src="script.js" defer></script>
 </body>
 

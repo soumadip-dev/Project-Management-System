@@ -1,17 +1,25 @@
-////////// Dom elements
+////////// DOM Elements
 const themeToggle = document.getElementById('themeToggle');
 const html = document.documentElement;
 const gridView = document.getElementById('gridView');
 const listView = document.getElementById('listView');
 const booksContainer = document.getElementById('books-container');
 const searchBox = document.getElementById('search-box');
+const nextPage = document.getElementById('next');
+const previousPage = document.getElementById('prev');
+
+////////// Global variables
+let page = 1;
 
 ////////// Functions
 
-// function to fetch books from API
-async function fetchBooks() {
+// Function to fetch books from API
+async function fetchBooks(pageNumber) {
   try {
-    const response = await fetch('https://api.freeapi.app/api/v1/public/books');
+    const postsPerPage = 10;
+    const url = `https://api.freeapi.app/api/v1/public/books?page=${pageNumber}`;
+
+    const response = await fetch(url);
     const data = await response.json();
 
     const books = data?.data?.data || [];
@@ -23,15 +31,21 @@ async function fetchBooks() {
   }
 }
 
-// Function to display book in webpage
+// Function to display books on the webpage
 async function displayBooks(books) {
+  booksContainer.innerHTML = '';
+
   books.forEach(book => {
     const bookCard = createCard(book);
     booksContainer.appendChild(bookCard);
   });
+  // Update pagination buttons and current page display
+  document.getElementById('currentPage').textContent = page;
+  previousPage.disabled = page === 1;
+  nextPage.disabled = books.length < 10;
 }
 
-// Function to create card of book
+// Function to create a book card element
 function createCard(book) {
   const card = document.createElement('a');
   card.classList.add('book-card');
@@ -62,7 +76,7 @@ function createCard(book) {
   return card;
 }
 
-// Function to toggle theme ogf the webpage
+// Function to toggle the theme of the webpage
 function toggleTheme() {
   const currentTheme = html.getAttribute('data-theme');
   const newTheme = currentTheme === 'light' ? 'dark' : 'light';
@@ -70,7 +84,7 @@ function toggleTheme() {
   localStorage.setItem('theme', newTheme);
 }
 
-// Function of searching
+// Function to filter books by name
 function filterByName(event) {
   const searchTerm = event.target.value.toLowerCase();
   const books = document.querySelectorAll('.text-container h3');
@@ -86,9 +100,37 @@ function filterByName(event) {
   });
 }
 
-// function to sort A-Z
+// Function to go to next page
+async function goToNextPage() {
+  const nextPageNumber = page + 1;
+  const books = await fetchBooks(nextPageNumber);
+
+  if (books.length === 0) {
+    return;
+  }
+
+  page = nextPageNumber;
+  await displayBooks(books);
+  booksContainer.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Function to go to previous page
+async function goToPrevPage() {
+  if (page > 1) {
+    const prevPageNumber = page - 1;
+    const books = await fetchBooks(prevPageNumber);
+
+    if (books.length > 0) {
+      page = prevPageNumber;
+      await displayBooks(books);
+    }
+    booksContainer.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+// Function to sort books by title in ascending order (A-Z)
 async function sortingAToZ() {
-  const books = await fetchBooks();
+  const books = await fetchBooks(page);
   books.sort((a, b) => {
     let titleA = a.volumeInfo.title.toLowerCase();
     let titleB = b.volumeInfo.title.toLowerCase();
@@ -97,9 +139,9 @@ async function sortingAToZ() {
   displayBooks(books);
 }
 
-// function to sort Z-A
+// Function to sort books by title in descending order (Z-A)
 async function sortingZToA() {
-  const books = await fetchBooks();
+  const books = await fetchBooks(page);
   books.sort((a, b) => {
     let titleA = a.volumeInfo.title.toLowerCase();
     let titleB = b.volumeInfo.title.toLowerCase();
@@ -108,9 +150,9 @@ async function sortingZToA() {
   displayBooks(books);
 }
 
-// function to sort Date(oldest)
+// Function to sort books by published date (oldest first)
 async function sortingDateOldest() {
-  const books = await fetchBooks();
+  const books = await fetchBooks(page);
   books.sort((a, b) => {
     const dateA = new Date(a.volumeInfo.publishedDate || 0);
     const dateB = new Date(b.volumeInfo.publishedDate || 0);
@@ -119,9 +161,9 @@ async function sortingDateOldest() {
   displayBooks(books);
 }
 
-// Function to sort Date(newest)
+// Function to sort books by published date (newest first)
 async function sortingDateNewest() {
-  const books = await fetchBooks();
+  const books = await fetchBooks(page);
   books.sort((a, b) => {
     const dateA = new Date(a.volumeInfo.publishedDate || 0);
     const dateB = new Date(b.volumeInfo.publishedDate || 0);
@@ -130,15 +172,11 @@ async function sortingDateNewest() {
   displayBooks(books);
 }
 
-// Check for saved theme preference
-const savedTheme = localStorage.getItem('theme') || 'light';
-html.setAttribute('data-theme', savedTheme);
-
-// Sort dropdown functionality
+// Function to handle sort selection from dropdown
 function selectSort(element) {
   const selectedText = element.textContent;
   document.getElementById('selectedSort').textContent = selectedText;
-  booksContainer.innerHTML = '';
+
   switch (selectedText) {
     case 'Title (A-Z)':
       sortingAToZ();
@@ -153,22 +191,27 @@ function selectSort(element) {
       sortingDateNewest();
       break;
     default:
-      displayBooks(fetchBooks());
+      displayBooks(fetchBooks(page));
   }
 }
 
-//////////// Event listuners
-document.addEventListener('DOMContentLoaded', () => {
-  // Fetch the books
-  fetchBooks().then(books => displayBooks(books));
+// Check for saved theme preference and apply it
+const savedTheme = localStorage.getItem('theme') || 'light';
+html.setAttribute('data-theme', savedTheme);
 
-  // change theme
+//////////// Event Listeners
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Fetch and display books when the page loads
+  fetchBooks(page).then(books => displayBooks(books));
+
+  // Toggle theme when the button is clicked
   themeToggle.addEventListener('click', toggleTheme);
 
-  // Search
+  // Filter books based on search input
   searchBox.addEventListener('input', filterByName);
 
-  // View controls
+  // Switch to grid view
   gridView.addEventListener('click', function () {
     gridView.classList.add('active');
     listView.classList.remove('active');
@@ -176,10 +219,16 @@ document.addEventListener('DOMContentLoaded', () => {
     booksContainer.classList.add('grid-view');
   });
 
+  // Switch to list view
   listView.addEventListener('click', function () {
     listView.classList.add('active');
     gridView.classList.remove('active');
     booksContainer.classList.remove('grid-view');
     booksContainer.classList.add('list-view');
   });
+
+  // Go to next page
+  nextPage.addEventListener('click', goToNextPage);
+  // Go to Previous page
+  previousPage.addEventListener('click', goToPrevPage);
 });
