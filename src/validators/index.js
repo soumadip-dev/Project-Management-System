@@ -39,6 +39,12 @@ const userRegistrationValidator = function () {
       .withMessage('Role is required')
       .isIn(['admin', 'user'])
       .withMessage('Role must be either "admin" or "user"'),
+    body('fullname')
+      .trim()
+      .notEmpty()
+      .withMessage('Full name is required')
+      .isLength({ min: 3 })
+      .withMessage('Full name must be at least 3 characters'),
   ];
 };
 

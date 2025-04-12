@@ -23,7 +23,7 @@ const sendMail = async function (options) {
   const transporter = nodemailer.createTransport({
     host: process.env.MAILTRAP_SMTP_HOST,
     port: process.env.MAILTRAP_SMTP_PORT,
-    secure: false, // FALSE FOR NON-SECURE CONNECTION
+    secure: false,
     auth: {
       user: process.env.MAILTRAP_SMTP_USERNAME,
       pass: process.env.MAILTRAP_SMTP_PASSWORD,
@@ -32,10 +32,10 @@ const sendMail = async function (options) {
 
   // Defining the mail options
   const mail = {
-    from: process.env.MAILTRAP_SMTP_SENDEREMAIL, 
-    to: options.email, 
-    subject: options.subject, 
-    text: emailText, 
+    from: process.env.MAILTRAP_SMTP_SENDEREMAIL,
+    to: options.email,
+    subject: options.subject,
+    text: emailText,
     html: emailHtml,
   };
 
@@ -53,18 +53,18 @@ function emailVerificationMailGenContent(userName, verificationUrl) {
   return {
     body: {
       name: userName,
-      intro: "WELCOME TO PROJECTNEST! WE'RE THRILLED TO HAVE YOU WITH US.",
+      intro: "Welcome to ProjectNest! We're thrilled to have you with us.",
       action: {
         instructions:
-          'TO COMPLETE YOUR REGISTRATION AND GET STARTED WITH PROJECTNEST, PLEASE VERIFY YOUR EMAIL ADDRESS BY CLICKING THE BUTTON BELOW:',
+          'To complete your registration and get started with ProjectNest, please verify your email address by clicking the button below:',
         button: {
           color: '#22BC66',
-          text: 'VERIFY YOUR EMAIL',
+          text: 'Verify your email',
           link: verificationUrl,
         },
       },
       outro:
-        "IF YOU HAVE ANY QUESTIONS OR NEED ASSISTANCE, FEEL FREE TO REPLY TO THIS EMAIL—WE'RE HERE TO HELP!",
+        "If you have any questions or need assistance, feel free to reply to this email—we're here to help!",
     },
   };
 }
@@ -92,3 +92,8 @@ function forgotPasswordMailGenContent(userName, resetPasswordUrl) {
 }
 
 // EXPORTING FUNCTIONS
+export {
+  emailVerificationMailGenContent,
+  forgotPasswordMailGenContent,
+  sendMail,
+};
